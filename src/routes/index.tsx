@@ -1,26 +1,79 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Navbar } from "@/components/Navbar";
+import { HeroSection } from "@/components/HeroSection";
+import { AboutSection, QualificationsSection, ExperienceSection, ServicesSection } from "@/components/Sections";
+import { ChambersSection } from "@/components/ChambersSection";
+import { ContactSection, Footer } from "@/components/ContactSection";
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+import { useSiteData } from "@/hooks/use-site-data";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Dr. Barkat Ali - Child Specialist Khulna | Pediatrician" },
+      {
+        name: "description",
+        content:
+          "Professor Dr. Md. Barkat Ali – Leading Newborn, Child & Adolescent Health Specialist in Khulna. MBBS, DCH, FCPS, FRCPCH. Book appointment now.",
+      },
+      {
+        name: "keywords",
+        content: "Child Specialist Khulna, Pediatrician Khulna, Dr Barkat Ali, Newborn Care Khulna, Baby Doctor Khulna",
+      },
+      { property: "og:title", content: "Dr. Barkat Ali - Child Specialist Khulna" },
+      {
+        property: "og:description",
+        content: "Leading Newborn, Child & Adolescent Health Specialist in Khulna. Book your appointment today.",
+      },
+      { property: "og:type", content: "website" },
+      {
+        property: "og:image",
+        content: "https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png",
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: HomePage,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+function HomePage() {
+  const { data } = useSiteData();
 
-function Index() {
-  return <PlaceholderIndex />;
+  // JSON-LD Schema
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Physician",
+    name: data.doctor.name,
+    description: data.doctor.intro,
+    medicalSpecialty: "Pediatrics",
+    image: data.doctor.imageUrl,
+    telephone: "+8801784052339",
+    address: data.chambers.map((c) => ({
+      "@type": "PostalAddress",
+      streetAddress: c.address,
+      addressLocality: "Khulna",
+      addressCountry: "BD",
+    })),
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <Navbar />
+      <main>
+        <HeroSection data={data} />
+        <AboutSection data={data} />
+        <QualificationsSection data={data} />
+        <ExperienceSection data={data} />
+        <ServicesSection data={data} />
+        <ChambersSection data={data} />
+        <ContactSection data={data} />
+      </main>
+      <Footer data={data} />
+      <FloatingWhatsApp phone={data.contact.whatsapp} />
+    </>
+  );
 }

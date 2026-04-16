@@ -1,24 +1,24 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
 import { getData, setData, type SiteData, getDefaultData } from "@/lib/data";
 
 export function useSiteData() {
-  const [data, setLocalData] = useState<SiteData>(() => {
-    if (typeof window === "undefined") return getDefaultData();
-    return getData();
-  });
+  const [data, setSiteData] = useState<SiteData>(getDefaultData());
 
   useEffect(() => {
-    const handler = (e: Event) => {
-      const customEvent = e as CustomEvent<SiteData>;
-      setLocalData(customEvent.detail);
-    };
-    window.addEventListener("siteDataUpdated", handler);
-    return () => window.removeEventListener("siteDataUpdated", handler);
+    const savedData = getData();
+    if (savedData) {
+      setSiteData(savedData);
+    }
   }, []);
 
-  const updateData = useCallback((newData: SiteData) => {
-    setLocalData(newData);
-    setData(newData);
+  const updateData = useCallback((newPartialData: Partial<SiteData>) => {
+    setSiteData((prevData) => {
+      const updatedData = { ...prevData, ...newPartialData };
+      setData(updatedData);
+      return updatedData;
+    });
   }, []);
 
   return { data, updateData };

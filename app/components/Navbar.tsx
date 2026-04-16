@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, MessageCircle } from "lucide-react";
@@ -35,7 +35,7 @@ export function Navbar() {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-6">
-        <a href="/#home" className="flex items-center gap-3">
+        <Link href="/#home" className="flex items-center gap-3">
           <img
             src={data.settings.logo}
             alt={`${data.doctor.name} Child Specialist Khulna`}
@@ -47,18 +47,18 @@ export function Navbar() {
             </span>
             <span className="text-[0.65rem] text-muted-foreground font-medium">Child Specialist</span>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-0.5 md:flex">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="rounded-full px-3.5 py-2 text-[0.82rem] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
           <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp ml-4 text-sm py-2.5 px-5">
             <MessageCircle className="h-4 w-4" /> Appointment
@@ -87,14 +87,14 @@ export function Navbar() {
           >
             <div className="flex flex-col p-3 gap-0.5">
               {NAV_LINKS.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   className="rounded-xl px-4 py-3 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp mt-2 justify-center text-sm">
                 <MessageCircle className="h-4 w-4" /> Book Appointment

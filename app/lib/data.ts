@@ -1,145 +1,167 @@
-// Firebase-ready data abstraction layer
-// Replace getData/setData internals with Firestore calls later
 
+import { db } from './firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+// TypeScript interfaces for our data structure
 export interface DoctorInfo {
   name: string;
-  title: string;
-  bmdc: string;
   intro: string;
   imageUrl: string;
 }
 
+export interface Qualification {
+  degree: string;
+  institute: string;
+  year: string;
+}
+
+export interface Experience {
+  position: string;
+  institute: string;
+  duration: string;
+}
+
+export interface Service {
+  name: string;
+  description: string;
+}
+
 export interface Chamber {
-  id: string;
   name: string;
   address: string;
-  schedule: string[];
-  phones: string[];
-  hotline?: string;
-  website?: string;
-  facebook?: string;
-  mapQuery: string;
+  time: string;
+  days: string[];
+  contact: string;
+  mapLink: string;
 }
 
 export interface ContactInfo {
+  phone: string;
+  email: string;
   whatsapp: string;
-  website: string;
-  facebook: string;
 }
 
-export interface SiteSettings {
-  siteTitle: string;
+export interface SocialLinks {
+  facebook: string;
+  youtube: string;
+  linkedin: string;
+}
+
+export interface AdminSettings {
   logo: string;
   adminPassword: string;
 }
 
 export interface SiteData {
   doctor: DoctorInfo;
-  qualifications: string[];
-  experience: string[];
-  services: string[];
+  qualifications: Qualification[];
+  experience: Experience[];
+  services: Service[];
   chambers: Chamber[];
   contact: ContactInfo;
-  settings: SiteSettings;
+  social: SocialLinks;
+  settings: AdminSettings;
 }
 
-const DEFAULT_DATA: SiteData = {
+const DATA_DOC_ID = 'siteData'; // The document ID in Firestore
+
+// --- Default Data --- //
+// This data is used for initial setup or if no data is in Firestore
+const defaultData: SiteData = {
   doctor: {
-    name: "Professor Dr. Md. Barkot Ali",
-    title: "Newborn, Child & Adolescent Health Specialist",
-    bmdc: "A-25803",
-    intro: "With decades of experience in pediatric care, Professor Dr. Md. Barkot Ali is one of the most trusted child health specialists in Khulna. He provides compassionate, evidence-based care for newborns, children, and adolescents.",
-    imageUrl: "https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png",
+    name: 'Dr. Barkot Ali',
+    intro: 'MBBS, DCH, FCPS (Pediatrics). Child Specialist & Neonatologist.',
+    imageUrl: '/placeholder-doctor.jpg',
   },
   qualifications: [
-    "MBBS (Dhaka)",
-    "DCH",
-    "FCPS (India)",
-    "FRCPCH (UK)",
+    { degree: 'FCPS (Pediatrics)', institute: 'BCPS, Dhaka', year: '2016' },
+    { degree: 'DCH (Diploma in Child Health)', institute: 'University of Dhaka', year: '2010' },
+    { degree: 'MBBS', institute: 'Khulna Medical College', year: '2004' },
   ],
   experience: [
-    "Former Child Specialist – Bangladesh Navy Hospital (CMH Khulna)",
-    "Former Head of Pediatrics – GMC",
-    "Professor & Head of Pediatrics – MSMC",
+    { position: 'Associate Professor', institute: 'Khulna City Medical College', duration: '2020 - Present' },
+    { position: 'Consultant', institute: 'Khulna Medical College Hospital', duration: '2016 - 2020' },
   ],
   services: [
-    "Newborn Care",
-    "Child & Adolescent Treatment",
-    "Vaccination & Immunization",
-    "Fever & Infection Treatment",
-    "Growth Monitoring",
-    "Nutrition Advice",
+    { name: 'Newborn Care', description: 'Comprehensive care for newborns, including routine check-ups and emergency services.' },
+    { name: 'Vaccination', description: 'Complete vaccination services for children of all ages as per national guidelines.' },
+    { name: 'Growth Monitoring', description: 'Regular monitoring of physical growth and development milestones.' },
+    { name: 'Nutritional Advice', description: 'Expert advice on child nutrition for healthy growth.' },
+    { name: 'Common Illnesses', description: 'Treatment for common childhood illnesses like fever, cough, cold, and diarrhea.' },
+    { name: 'Pediatric Emergencies', description: 'Handling of pediatric emergency cases with utmost care.' },
   ],
   chambers: [
     {
-      id: "1",
-      name: "Khadija Villa",
-      address: "Holding No-20, Ward No-5, KDA Market Road (Rishipara), Daulatpur, Khulna",
-      schedule: [
-        "Daily 5 PM – 9 PM",
-        "Monday Closed",
-        "Friday 9 AM – 12 PM",
-      ],
-      phones: ["01784-052339", "01972-050951"],
-      mapQuery: "Khadija Villa Daulatpur Khulna",
-    },
-    {
-      id: "2",
-      name: "Popular Diagnostic Centre Ltd. (Khulna)",
-      address: "House #37, KDA Avenue, Moylapota-Sheikhpara",
-      schedule: [
-        "Tuesday, Wednesday, Thursday",
-        "10 AM – 1 PM",
-      ],
-      phones: [],
-      hotline: "09666787821",
-      website: "www.populardiagnostic.com",
-      facebook: "facebook.com/populardiagnostickhulna",
-      mapQuery: "Popular Diagnostic Centre Khulna",
+      name: 'Popular Diagnostic Center',
+      address: '2, KDA Avenue, Khulna',
+      time: '5 PM - 8 PM',
+      days: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu'],
+      contact: '+880 1234-567890',
+      mapLink: 'https://maps.app.goo.gl/9aJj3jfs9k3fDj3k9',
     },
   ],
   contact: {
-    whatsapp: "01712-050951",
-    website: "www.populardiagnostic.com",
-    facebook: "facebook.com/populardiagnostickhulna",
+    phone: '+8801712050951',
+    email: 'info@drbarkot.com',
+    whatsapp: '+8801712050951',
+  },
+  social: {
+    facebook: 'https://facebook.com/drbarkot',
+    youtube: '#',
+    linkedin: '#',
   },
   settings: {
-    siteTitle: "Dr. Barkot Ali - Child Specialist Khulna",
-    logo: "https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png",
-    adminPassword: "Barkot Ali",
+    logo: '/logo-placeholder.png',
+    adminPassword: 'Barkot Ali', // IMPORTANT: Move this to a secure environment variable!
   },
 };
 
-const STORAGE_KEY = "drbarkat_site_data";
+// --- Data Access Functions --- //
 
-// Abstraction functions — swap localStorage for Firestore later
-export function getData(): SiteData {
-  if (typeof window === "undefined") return DEFAULT_DATA;
+/**
+ * Fetches the site data from Firestore.
+ * If no data is found, it initializes Firestore with default data and returns it.
+ */
+export async function getData(): Promise<SiteData> {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Merge with defaults to handle new fields
-      return { ...DEFAULT_DATA, ...parsed, settings: { ...DEFAULT_DATA.settings, ...parsed.settings } };
+    const docRef = doc(db, 'siteContent', DATA_DOC_ID);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      // Make sure the fetched data conforms to the SiteData structure
+      const fetchedData = docSnap.data() as SiteData;
+      // Merge with default data to ensure all fields are present
+      return { ...defaultData, ...fetchedData };
+    } else {
+      console.log('No such document! Initializing with default data.');
+      // Document doesn't exist, so create it with default data
+      await setData(defaultData);
+      return defaultData;
     }
-  } catch {
-    // ignore
+  } catch (error) {
+    console.error('Error fetching data from Firestore:', error);
+    // In case of error, return default data so the site can still run
+    return defaultData;
   }
-  return DEFAULT_DATA;
 }
 
-export function setData(data: SiteData): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  window.dispatchEvent(new CustomEvent("siteDataUpdated", { detail: data }));
+/**
+ * Saves the entire site data object to Firestore.
+ * @param {SiteData} data The complete site data object to save.
+ */
+export async function setData(data: SiteData): Promise<void> {
+  try {
+    const docRef = doc(db, 'siteContent', DATA_DOC_ID);
+    await setDoc(docRef, data, { merge: true }); // Using merge to be safe
+  } catch (error) {
+    console.error('Error saving data to Firestore:', error);
+    throw error; // Re-throw the error to be handled by the calling function
+  }
 }
 
-export function resetData(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
-  window.dispatchEvent(new CustomEvent("siteDataUpdated", { detail: DEFAULT_DATA }));
-}
-
+/**
+ * Returns the default data. Useful for initial state or resets.
+ */
 export function getDefaultData(): SiteData {
-  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  return defaultData;
 }

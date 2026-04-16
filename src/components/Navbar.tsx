@@ -37,13 +37,13 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-6">
         <a href="/#home" className="flex items-center gap-3">
           <img
-            src="https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png"
-            alt="Dr Barkot Ali Child Specialist Khulna"
+            src={data.settings.logo}
+            alt={`${data.doctor.name} Child Specialist Khulna`}
             className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20"
           />
           <div className="hidden sm:block">
             <span className="font-heading text-base font-bold text-foreground leading-tight block">
-              Dr. Barkot Ali
+              {data.doctor.name}
             </span>
             <span className="text-[0.65rem] text-muted-foreground font-medium">Child Specialist</span>
           </div>
